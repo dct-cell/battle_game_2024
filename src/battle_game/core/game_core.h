@@ -20,6 +20,7 @@
 namespace battle_game {
 constexpr int kTickPerSecond = 60;
 constexpr float kSecondPerTick = 1.0f / float(kTickPerSecond);
+
 class GameCore {
  public:
   GameCore();
