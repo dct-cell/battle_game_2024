@@ -93,20 +93,18 @@ void Dct_Tank::TankMove(float move_speed, float rotate_angular_speed) {
   if (player) {
     auto &input_data = player->GetInputData();
     glm::vec2 offset{0.0f};
-    if(trans_step_ % 5 == 1){
-      offset.y += 4.0f;
-    }
-    if (input_data.key_down[GLFW_KEY_W]) {
+    if (input_data.key_down[GLFW_KEY_W] && input_data.key_down[GLFW_KEY_X]){
+      offset.y += 3.0f;
+    }else if (input_data.key_down[GLFW_KEY_W]) {
       offset.y += 1.0f;
     }
-    if (input_data.key_down[GLFW_KEY_S]) {
+    if (input_data.key_down[GLFW_KEY_S] && input_data.key_down[GLFW_KEY_X]){
+      offset.y -= 3.0f;
+    }else if(input_data.key_down[GLFW_KEY_S]){
       offset.y -= 1.0f;
     }
-    if (input_data.key_down[GLFW_KEY_W] && input_data.key_down[GLFW_KEY_X]){
-        offset.y += 3.0f;
-    }
-    if (input_data.key_down[GLFW_KEY_S] && input_data.key_down[GLFW_KEY_X]){
-        offset.y -= 3.0f;
+    if(trans_step_ % 5 == 1){
+      offset.y += 4.0f;
     }
     float speed = move_speed * GetSpeedScale();
     offset *= kSecondPerTick * speed;
@@ -124,14 +122,14 @@ void Dct_Tank::TankMove(float move_speed, float rotate_angular_speed) {
     if (input_data.key_down[GLFW_KEY_D]) {
       rotation_offset -= 1.0f;
     }
-    rotation_offset *= kSecondPerTick * rotate_angular_speed * GetSpeedScale();
     if (input_data.key_down[GLFW_KEY_B]) {
       if (back_count_down_ == 0){
         rotation_offset += glm::pi<float>() * 1.0f;
         back_count_down_ = kTickPerSecond / 2;  // Fire interval 0.5 second.
       } 
     }
-    if (input_data.key_down[GLFW_KEY_Z]) {
+    rotation_offset *= kSecondPerTick * rotate_angular_speed * GetSpeedScale();
+    if (input_data.key_down[GLFW_KEY_T]) {
       if (trans_count_down_ == 0){
         trans_count_down_ = kTickPerSecond * 10;  // Fire interval 10 second.
         trans_step_ = kTickPerSecond * 1;
@@ -164,10 +162,10 @@ void Dct_Tank::TurretRotate() {
 }
 
 void Dct_Tank::Fire() {
-  if (fire_count_down_ == 0) {
-    auto player = game_core_->GetPlayer(player_id_);
-    if (player) {
-      auto &input_data = player->GetInputData();
+  auto player = game_core_->GetPlayer(player_id_);
+  if (player) {
+    auto &input_data = player->GetInputData();
+    if (fire_count_down_ == 0){
       if (input_data.mouse_button_down[GLFW_MOUSE_BUTTON_LEFT] && input_data.key_down[GLFW_KEY_Q]){
         auto velocity = Rotate(glm::vec2{0.0f, 13.0f}, turret_rotation_);
         GenerateBullet<bullet::EvoCannonBall>(
@@ -181,39 +179,40 @@ void Dct_Tank::Fire() {
             turret_rotation_, GetDamageScale(), velocity);
         fire_count_down_ = kTickPerSecond;  // Fire interval 1 second.
       }
-      if(input_data.key_down[GLFW_KEY_E]){
-        if (skill_1_count_down_ == 0){
-          auto velocity = Rotate(glm::vec2{0.0f, 10.0f}, turret_rotation_);
-          auto alpha = glm::pi<float>() * 0.1f;
-          for(int k = 0 ; k < 20 ; k++){
-            GenerateBullet<bullet::CannonBall>(
-              position_ + Rotate({0.0f, 1.2f}, turret_rotation_ + k * alpha),
-              turret_rotation_ + k * alpha, GetDamageScale(), Rotate(velocity, turret_rotation_ + k * alpha));
-          }
-          fire_count_down_ = kTickPerSecond;  // Fire interval 1 second.
-          skill_1_count_down_ = 10 * kTickPerSecond;  // Skill interval 10 second.
+    }
+    if(input_data.key_down[GLFW_KEY_E]){
+      if (skill_1_count_down_ == 0){
+        auto velocity = Rotate(glm::vec2{0.0f, 10.0f}, turret_rotation_);
+        auto alpha = glm::pi<float>() * 0.1f;
+        for(int k = 0 ; k < 20 ; k++){
+          GenerateBullet<bullet::CannonBall>(
+            position_ + Rotate({0.0f, 1.2f}, turret_rotation_ + k * alpha),
+            turret_rotation_ + k * alpha, GetDamageScale(), Rotate(velocity, turret_rotation_ + k * alpha));
         }
-      }
-      if(input_data.key_down[GLFW_KEY_C]){
-        auto velocity = Rotate(glm::vec2{0.0f, 5.0f}, turret_rotation_);
-        GenerateBullet<bullet::Meteorite>(
-            position_ + Rotate({0.0f, 1.2f}, turret_rotation_),
-            turret_rotation_, GetDamageScale(), velocity);
-        fire_count_down_ = 20 * kTickPerSecond;  // Fire interval 20 second.
-      }
-      if(trans_step_ % 5 == 1){
-        auto velocity = Rotate(glm::vec2{0.0f, 20.0f}, rotation_);
-        auto beta = glm::pi<float>() * 0.5f;
-        GenerateBullet<bullet::CannonBall>(
-            position_ + Rotate({0.0f, 1.2f}, rotation_ + beta),
-            rotation_ + beta, GetDamageScale(), Rotate(velocity,  beta));
-        GenerateBullet<bullet::CannonBall>(
-            position_ + Rotate({0.0f, 1.2f}, rotation_ - beta),
-            rotation_ - beta, GetDamageScale(), Rotate(velocity, -beta));
+        fire_count_down_ = kTickPerSecond;  // Fire interval 1 second.
+        skill_1_count_down_ = 10 * kTickPerSecond;  // Skill interval 10 second.
       }
     }
+    if(input_data.key_down[GLFW_KEY_K]){
+      if(meteo_count_down_ == 0){
+        auto velocity = Rotate(glm::vec2{0.0f, 5.0f}, turret_rotation_);
+        GenerateBullet<bullet::Meteorite>(
+          position_ + Rotate({0.0f, 1.2f}, turret_rotation_),
+          turret_rotation_, GetDamageScale(), velocity);
+        meteo_count_down_ = 20 * kTickPerSecond;  // Fire interval 20 second.
+      } 
+    }
+    if(trans_step_ % 5 == 1){
+      auto velocity = Rotate(glm::vec2{0.0f, 20.0f}, rotation_);
+      auto beta = glm::pi<float>() * 0.5f;
+      GenerateBullet<bullet::CannonBall>(
+          position_ + Rotate({0.0f, 1.2f}, rotation_ + beta),
+          rotation_ + beta, GetDamageScale(), Rotate(velocity,  beta));
+      GenerateBullet<bullet::CannonBall>(
+          position_ + Rotate({0.0f, 1.2f}, rotation_ - beta),
+          rotation_ - beta, GetDamageScale(), Rotate(velocity, -beta));
+    }
   }
-
   if (fire_count_down_) {
     fire_count_down_--;
   }

@@ -49,7 +49,7 @@ void Meteorite::Update() {
 Meteorite::~Meteorite() {
   for (int i = 0; i < 5; i++) {
     game_core_->PushEventGenerateParticle<particle::Smoke>(
-        position_, rotation_, game_core_->RandomInCircle() * 2.0f, 0.2f,
+        position_, rotation_, game_core_->RandomInCircle() * 2.0f, 0.7f,
         glm::vec4{0.0f, 0.0f, 0.0f, 1.0f}, 3.0f);
   }
 }
