@@ -121,14 +121,14 @@ void Dct_Tank::TankMove(float move_speed, float rotate_angular_speed) {
     }
     if (input_data.key_down[GLFW_KEY_D]) {
       rotation_offset -= 1.0f;
-    }
+    } 
+    rotation_offset *= kSecondPerTick * rotate_angular_speed * GetSpeedScale();
     if (input_data.key_down[GLFW_KEY_B]) {
       if (back_count_down_ == 0){
         rotation_offset += glm::pi<float>() * 1.0f;
         back_count_down_ = kTickPerSecond / 2;  // Fire interval 0.5 second.
       } 
     }
-    rotation_offset *= kSecondPerTick * rotate_angular_speed * GetSpeedScale();
     if (input_data.key_down[GLFW_KEY_T]) {
       if (trans_count_down_ == 0){
         trans_count_down_ = kTickPerSecond * 10;  // Fire interval 10 second.
