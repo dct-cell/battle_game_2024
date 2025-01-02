@@ -165,23 +165,27 @@ void Dct_Tank::Fire() {
   auto player = game_core_->GetPlayer(player_id_);
   if (player) {
     auto &input_data = player->GetInputData();
+    if(input_data.key_down[GLFW_KEY_Q]){
+      fire_pattern = !fire_pattern;
+    }
     if (fire_count_down_ == 0){
-      if (input_data.mouse_button_down[GLFW_MOUSE_BUTTON_LEFT] && input_data.key_down[GLFW_KEY_Q]){
+      if (input_data.mouse_button_down[GLFW_MOUSE_BUTTON_LEFT]){
         auto velocity = Rotate(glm::vec2{0.0f, 13.0f}, turret_rotation_);
-        GenerateBullet<bullet::EvoCannonBall>(
+        if(fire_pattern){
+          GenerateBullet<bullet::EvoCannonBall>(
             position_ + Rotate({0.0f, 1.2f}, turret_rotation_),
             turret_rotation_, GetDamageScale(), velocity);
         fire_count_down_ = 2 * kTickPerSecond;  // Fire interval 2 second.
-      } else if (input_data.mouse_button_down[GLFW_MOUSE_BUTTON_LEFT]) {
-        auto velocity = Rotate(glm::vec2{0.0f, 20.0f}, turret_rotation_);
-        GenerateBullet<bullet::CannonBall>(
+        }else{
+          GenerateBullet<bullet::CannonBall>(
             position_ + Rotate({0.0f, 1.2f}, turret_rotation_),
             turret_rotation_, GetDamageScale(), velocity);
-        fire_count_down_ = kTickPerSecond;  // Fire interval 1 second.
-      }
+          fire_count_down_ = kTickPerSecond;  // Fire interval 1 second.
+        }
+      }  
     }
     if(input_data.key_down[GLFW_KEY_E]){
-      if (skill_1_count_down_ == 0){
+      if (skill_count_down_ == 0){
         auto velocity = Rotate(glm::vec2{0.0f, 10.0f}, turret_rotation_);
         auto alpha = glm::pi<float>() * 0.1f;
         for(int k = 0 ; k < 20 ; k++){
@@ -190,7 +194,7 @@ void Dct_Tank::Fire() {
             turret_rotation_ + k * alpha, GetDamageScale(), Rotate(velocity, turret_rotation_ + k * alpha));
         }
         fire_count_down_ = kTickPerSecond;  // Fire interval 1 second.
-        skill_1_count_down_ = 10 * kTickPerSecond;  // Skill interval 10 second.
+        skill_count_down_ = 10 * kTickPerSecond;  // Skill interval 10 second.
       }
     }
     if(input_data.key_down[GLFW_KEY_K]){
@@ -216,8 +220,8 @@ void Dct_Tank::Fire() {
   if (fire_count_down_) {
     fire_count_down_--;
   }
-  if (skill_1_count_down_) {
-    skill_1_count_down_--;
+  if (skill_count_down_) {
+    skill_count_down_--;
   }
   if (meteo_count_down_) {
     meteo_count_down_--;
