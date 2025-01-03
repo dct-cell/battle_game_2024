@@ -166,7 +166,10 @@ void Dct_Tank::Fire() {
   if (player) {
     auto &input_data = player->GetInputData();
     if(input_data.key_down[GLFW_KEY_Q]){
-      fire_pattern = !fire_pattern;
+      if (change_count_down_ == 0){
+        change_count_down_ = kTickPerSecond / 2;  // Change interval 0.5 second.
+        fire_pattern = !fire_pattern;
+      }
     }
     if (fire_count_down_ == 0){
       if (input_data.mouse_button_down[GLFW_MOUSE_BUTTON_LEFT]){
@@ -225,6 +228,9 @@ void Dct_Tank::Fire() {
   }
   if (meteo_count_down_) {
     meteo_count_down_--;
+  }
+  if (change_count_down_) {
+    change_count_down_--;
   }
 }
 
